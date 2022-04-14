@@ -19,6 +19,8 @@ class Flight
     public:
         Flight();
         Flight(string _year, string _month, string _day, string _departure, string _arrival, string _airline, bool _delayed, bool _cancelled);
+
+        void printFlight();
 };
 
 //Flight Constructor
@@ -31,6 +33,12 @@ Flight::Flight(string _year, string _month, string _day, string _departure, stri
     airline = _airline;
     delayed = _delayed;
     cancelled = _cancelled;
+}
+
+void Flight::printFlight()
+{
+    cout << year << " " << month << " " << day << " " << departure << " " << arrival;
+    cout << " " << airline << " " << delayed << " " << cancelled << endl;
 }
 
 // Object used to hold airline data
@@ -97,8 +105,6 @@ int main() {
             
             // Create flight object based on strings
             // Check if flight is cancelled before adding delays
-            Flight currentFlight;
-
             if (cancellation == "0")
             {
                 bool delayed, cancelled;
@@ -113,14 +119,19 @@ int main() {
                 else if (stoi(arriveDelay) <= 0 && destination == "ORD")
                     delayed = false;
 
-                currentFlight = Flight(year, month, day, origin, destination, airline, delayed, cancelled);
+                Flight currentFlight = Flight(year, month, day, origin, destination, airline, delayed, cancelled);
+
+                // INSERT INTO DATA STRUCTURE
+                flights.push_back(currentFlight);
             }
 
             else
-                currentFlight = Flight(year, month, day, origin, destination, airline, false, true);
+            {
+                Flight currentFlight = Flight(year, month, day, origin, destination, airline, false, true);
 
-            // INSERT currentFlight INTO DATA STRUCTURE
-            flights.push_back(currentFlight);
+                // INSERT INTO DATA STRUCTURE
+                flights.push_back(currentFlight);
+            }
         }
     }
 
