@@ -134,10 +134,6 @@ int main() {
             }
         }
     }
-
-    // THIS IS COLE
-
-
     // Possible data structures:
     // Red-black tree
     // 
