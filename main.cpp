@@ -87,7 +87,10 @@ int main() {
         // Transfer to booleans
         string departDelay, arriveDelay, cancellation;
 
+        // TEST DATA STRUCTURE
         vector<Flight> flights;
+
+        int uniqueCounter = 0;
 
         while (!data.eof())
         {
@@ -118,6 +121,9 @@ int main() {
                     delayed = true;
                 else if (stoi(arriveDelay) <= 0 && destination == "ORD")
                     delayed = false;
+
+                string uniqueID;
+                uniqueID = airline + to_string(uniqueCounter);
 
                 Flight currentFlight = Flight(year, month, day, origin, destination, airline, delayed, cancelled);
 
