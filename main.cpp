@@ -6,20 +6,88 @@
 #include <vector>
 
 using namespace std;
+// Object used to hold flight data
 
-//DATA STRUCTURES IMPLEMENTATION
-//Red Black Tree Implementation
-/*
-// data structure that represents a node in the tree
+class Flight
+{
+private:
+    string uniqueID;
+    string year, month, day;
+    string departure, arrival, airline;
+    bool delayed;
+    bool cancelled;
+
+public:
+    Flight(string _year, string _month, string _day, string _departure, string _arrival, string _airline, bool _delayed, bool _cancelled, string uniqueID);
+
+    void printFlight();
+    string GetUniqueID();
+};
+
+//Flight Constructor
+Flight::Flight(string _year, string _month, string _day, string _departure, string _arrival, string _airline, bool _delayed, bool _cancelled, string _uniqueID) {
+    year = _year;
+    month = _month;
+    day = _day;
+    departure = _departure;
+    arrival = _arrival;
+    airline = _airline;
+    delayed = _delayed;
+    cancelled = _cancelled;
+    uniqueID = _uniqueID;
+}
+
+void Flight::printFlight()
+{
+    cout << year << " " << month << " " << day << " " << departure << " " << arrival;
+    cout << " " << airline << " " << delayed << " " << cancelled << " " << uniqueID << endl;
+}
+
+string Flight::GetUniqueID() 
+{
+    return(uniqueID);
+}
+
+// Object used to hold airline data
+class Airline
+{
+private:
+    string name;
+    int numFlights, numFlightsDelayed, numFlightsCancelled;
+    double pctDelayed, pctCancelled;
+
+public:
+    Airline();
+    Airline(string _name);
+    // REMINDER: only consider positive flight delays
+};
+
+//Airline Constructor
+Airline::Airline(string _name) {
+    name = _name;
+    numFlights = 0;
+    numFlightsDelayed = 0;
+    numFlightsCancelled = 0;
+    pctDelayed = 0.0;
+    pctCancelled = 0.0;
+}
+
+
+
+
+
+// DATA STRUCTURES
+// Red Black Tree
+// Data structure that represents a node in the tree
 struct Node {
 	Flight flight; // holds the key
-	Node *parent; // pointer to the parent
-	Node *left; // pointer to left child
-	Node *right; // pointer to right child
+	Node* parent; // pointer to the parent
+	Node* left; // pointer to left child
+	Node* right; // pointer to right child
 	int color; // 1 -> Red, 0 -> Black
 };
 
-typedef Node *NodePtr;
+typedef Node* NodePtr;
 
 // class RBTree implements the operations in Red Black Tree
 class RBTree {
@@ -30,6 +98,8 @@ private:
 	// initializes the nodes with appropirate values
 	// all the pointers are set to point to the null pointer
 	void initializeNULLNode(NodePtr node, NodePtr parent) {
+		Flight trashFlight = Flight(" ", " ", " ", " ", " ", " ", false, false, " ");
+		node->flight = trashFlight;
 		node->parent = parent;
 		node->left = nullptr;
 		node->right = nullptr;
@@ -38,36 +108,36 @@ private:
 
 	void preOrderHelper(NodePtr node) {
 		if (node != TNULL) {
-			cout<<node->flight.GetID()<<" ";
+			cout << node->flight.GetUniqueID() << " ";
 			preOrderHelper(node->left);
 			preOrderHelper(node->right);
-		} 
+		}
 	}
 
 	void inOrderHelper(NodePtr node) {
 		if (node != TNULL) {
 			inOrderHelper(node->left);
-			cout<<node->data<<" ";
+			cout << node->flight.GetUniqueID() << " ";
 			inOrderHelper(node->right);
-		} 
+		}
 	}
 
 	void postOrderHelper(NodePtr node) {
 		if (node != TNULL) {
 			postOrderHelper(node->left);
 			postOrderHelper(node->right);
-			cout<<node->data<<" ";
-		} 
+			cout << node->flight.GetUniqueID() << " ";
+		}
 	}
 
-	NodePtr searchTreeHelper(NodePtr node, int key) {
-		if (node == TNULL || key == node->data) {
+	NodePtr searchTreeHelper(NodePtr node, Flight key) {
+		if (node == TNULL || key.GetUniqueID() == node->flight.GetUniqueID()) {
 			return node;
 		}
 
-		if (key < node->data) {
+		if (key.GetUniqueID() < node->flight.GetUniqueID()) {
 			return searchTreeHelper(node->left, key);
-		} 
+		}
 		return searchTreeHelper(node->right, key);
 	}
 
@@ -89,14 +159,15 @@ private:
 					// case 3.2
 					s->color = 1;
 					x = x->parent;
-				} else {
+				}
+				else {
 					if (s->right->color == 0) {
 						// case 3.3
 						s->left->color = 0;
 						s->color = 1;
 						rightRotate(s);
 						s = x->parent->right;
-					} 
+					}
 
 					// case 3.4
 					s->color = x->parent->color;
@@ -105,7 +176,8 @@ private:
 					leftRotate(x->parent);
 					x = root;
 				}
-			} else {
+			}
+			else {
 				s = x->parent->left;
 				if (s->color == 1) {
 					// case 3.1
@@ -119,14 +191,15 @@ private:
 					// case 3.2
 					s->color = 1;
 					x = x->parent;
-				} else {
+				}
+				else {
 					if (s->left->color == 0) {
 						// case 3.3
 						s->right->color = 0;
 						s->color = 1;
 						leftRotate(s);
 						s = x->parent->left;
-					} 
+					}
 
 					// case 3.4
 					s->color = x->parent->color;
@@ -135,59 +208,65 @@ private:
 					rightRotate(x->parent);
 					x = root;
 				}
-			} 
+			}
 		}
 		x->color = 0;
 	}
 
 
-	void rbTransplant(NodePtr u, NodePtr v){
+	void rbTransplant(NodePtr u, NodePtr v) {
 		if (u->parent == nullptr) {
 			root = v;
-		} else if (u == u->parent->left){
+		}
+		else if (u == u->parent->left) {
 			u->parent->left = v;
-		} else {
+		}
+		else {
 			u->parent->right = v;
 		}
 		v->parent = u->parent;
 	}
 
-	void deleteNodeHelper(NodePtr node, int key) {
+	void deleteNodeHelper(NodePtr node, Flight key) {
 		// find the node containing key
 		NodePtr z = TNULL;
 		NodePtr x, y;
-		while (node != TNULL){
-			if (node->data == key) {
+		while (node != TNULL) {
+			if (node->flight.GetUniqueID() == key.GetUniqueID()) {
 				z = node;
 			}
 
-			if (node->data <= key) {
+			if (node->flight.GetUniqueID() <= key.GetUniqueID()) {
 				node = node->right;
-			} else {
+			}
+			else {
 				node = node->left;
 			}
 		}
 
 		if (z == TNULL) {
-			cout<<"Couldn't find key in the tree"<<endl;
+			cout << "Couldn't find key in the tree" << endl;
 			return;
-		} 
+		}
 
 		y = z;
 		int y_original_color = y->color;
 		if (z->left == TNULL) {
 			x = z->right;
 			rbTransplant(z, z->right);
-		} else if (z->right == TNULL) {
+		}
+		else if (z->right == TNULL) {
 			x = z->left;
 			rbTransplant(z, z->left);
-		} else {
+		}
+		else {
 			y = minimum(z->right);
 			y_original_color = y->color;
 			x = y->right;
 			if (y->parent == z) {
 				x->parent = y;
-			} else {
+			}
+			else {
 				rbTransplant(y, y->right);
 				y->right = z->right;
 				y->right->parent = y;
@@ -199,13 +278,13 @@ private:
 			y->color = z->color;
 		}
 		delete z;
-		if (y_original_color == 0){
+		if (y_original_color == 0) {
 			fixDelete(x);
 		}
 	}
-	
+
 	// fix the red-black tree
-	void fixInsert(NodePtr k){
+	void fixInsert(NodePtr k) {
 		NodePtr u;
 		while (k->parent->color == 1) {
 			if (k->parent == k->parent->parent->right) {
@@ -216,7 +295,8 @@ private:
 					k->parent->color = 0;
 					k->parent->parent->color = 1;
 					k = k->parent->parent;
-				} else {
+				}
+				else {
 					if (k == k->parent->left) {
 						// case 3.2.2
 						k = k->parent;
@@ -227,7 +307,8 @@ private:
 					k->parent->parent->color = 1;
 					leftRotate(k->parent->parent);
 				}
-			} else {
+			}
+			else {
 				u = k->parent->parent->right; // uncle
 
 				if (u->color == 1) {
@@ -235,8 +316,9 @@ private:
 					u->color = 0;
 					k->parent->color = 0;
 					k->parent->parent->color = 1;
-					k = k->parent->parent;	
-				} else {
+					k = k->parent->parent;
+				}
+				else {
 					if (k == k->parent->right) {
 						// mirror case 3.2.2
 						k = k->parent;
@@ -257,20 +339,21 @@ private:
 
 	void printHelper(NodePtr root, string indent, bool last) {
 		// print the tree structure on the screen
-	   	if (root != TNULL) {
-		   cout<<indent;
-		   if (last) {
-		      cout<<"R----";
-		      indent += "     ";
-		   } else {
-		      cout<<"L----";
-		      indent += "|    ";
-		   }
-            
-           string sColor = root->color?"RED":"BLACK";
-		   cout<<root->data<<"("<<sColor<<")"<<endl;
-		   printHelper(root->left, indent, false);
-		   printHelper(root->right, indent, true);
+		if (root != TNULL) {
+			cout << indent;
+			if (last) {
+				cout << "R----";
+				indent += "     ";
+			}
+			else {
+				cout << "L----";
+				indent += "|    ";
+			}
+
+			string sColor = root->color ? "RED" : "BLACK";
+			cout << root->flight.GetUniqueID() << "(" << sColor << ")" << endl;
+			printHelper(root->left, indent, false);
+			printHelper(root->right, indent, true);
 		}
 		// cout<<root->left->data<<endl;
 	}
@@ -304,7 +387,7 @@ public:
 
 	// search the tree for the key k
 	// and return the corresponding node
-	NodePtr searchTree(int k) {
+	NodePtr searchTree(Flight k) {
 		return searchTreeHelper(this->root, k);
 	}
 
@@ -371,9 +454,11 @@ public:
 		y->parent = x->parent;
 		if (x->parent == nullptr) {
 			this->root = y;
-		} else if (x == x->parent->left) {
+		}
+		else if (x == x->parent->left) {
 			x->parent->left = y;
-		} else {
+		}
+		else {
 			x->parent->right = y;
 		}
 		y->left = x;
@@ -390,9 +475,11 @@ public:
 		y->parent = x->parent;
 		if (x->parent == nullptr) {
 			this->root = y;
-		} else if (x == x->parent->right) {
+		}
+		else if (x == x->parent->right) {
 			x->parent->right = y;
-		} else {
+		}
+		else {
 			x->parent->left = y;
 		}
 		y->right = x;
@@ -401,11 +488,11 @@ public:
 
 	// insert the key to the tree in its appropriate position
 	// and fix the tree
-	void insert(int key) {
+	void insert(Flight flight) {
 		// Ordinary Binary Search Insertion
 		NodePtr node = new Node;
 		node->parent = nullptr;
-		node->data = key;
+		node->flight = flight;
 		node->left = TNULL;
 		node->right = TNULL;
 		node->color = 1; // new node must be red
@@ -415,9 +502,10 @@ public:
 
 		while (x != TNULL) {
 			y = x;
-			if (node->data < x->data) {
+			if (node->flight.GetUniqueID() < x->flight.GetUniqueID()) {
 				x = x->left;
-			} else {
+			}
+			else {
 				x = x->right;
 			}
 		}
@@ -426,14 +514,16 @@ public:
 		node->parent = y;
 		if (y == nullptr) {
 			root = node;
-		} else if (node->data < y->data) {
+		}
+		else if (node->flight.GetUniqueID() < y->flight.GetUniqueID()) {
 			y->left = node;
-		} else {
+		}
+		else {
 			y->right = node;
 		}
 
 		// if new node is a root node, simply return
-		if (node->parent == nullptr){
+		if (node->parent == nullptr) {
 			node->color = 0;
 			return;
 		}
@@ -447,24 +537,23 @@ public:
 		fixInsert(node);
 	}
 
-	NodePtr getRoot(){
+	NodePtr getRoot() {
 		return this->root;
 	}
 
 	// delete the node from the tree
-	void deleteNode(int data) {
-		deleteNodeHelper(this->root, data);
+	void deleteNode(Flight flight) {
+		deleteNodeHelper(this->root, flight);
 	}
 
 	// print the tree structure on the screen
 	void prettyPrint() {
-	    if (root) {
-    		printHelper(this->root, "", true);
-	    }
+		if (root) {
+			printHelper(this->root, "", true);
+		}
 	}
 
 };
-*/
 
 
 
@@ -479,72 +568,10 @@ public:
 
 
 
-
-
-
-
-// Object used to hold flight data
-class Flight
-{
-    private:
-        string year, month, day;
-        string departure, arrival, airline;
-        string id;
-        bool delayed;
-        bool cancelled;
-
-    public:
-        Flight();
-        Flight(string _year, string _month, string _day, string _departure, string _arrival, string _airline, bool _delayed, bool _cancelled, string id);
-
-        void printFlight();
-};
-
-//Flight Constructor
-Flight::Flight(string _year, string _month, string _day, string _departure, string _arrival, string _airline, bool _delayed, bool _cancelled, string _id){
-    year = _year;
-    month = _month;
-    day = _day;
-    departure = _departure;
-    arrival = _arrival;
-    airline = _airline;
-    delayed = _delayed;
-    cancelled = _cancelled;
-    id = _id;
-}
-
-void Flight::printFlight()
-{
-    cout << year << " " << month << " " << day << " " << departure << " " << arrival;
-    cout << " " << airline << " " << delayed << " " << cancelled << endl;
-}
-
-// Object used to hold airline data
-class Airline
-{
-    private:
-        string name;
-        int numFlights, numFlightsDelayed, numFlightsCancelled;
-        double pctDelayed, pctCancelled;
-
-    public:
-        Airline();
-        Airline(string _name);
-        // REMINDER: only consider positive flight delays
-};
-
-//Airline Constructor
-Airline::Airline(string _name){
-    name = _name;
-    numFlights= 0;
-    numFlightsDelayed = 0;
-    numFlightsCancelled = 0;
-    pctDelayed = 0.0;
-    pctCancelled = 0.0;
-}
 
 
 int main() {
+
     // Read in Excel sheets to gather flight data and place in containers
     // Loop will create Flight objects to be inserted into Red-Black tree/other container
     ifstream data;
@@ -553,6 +580,7 @@ int main() {
 
     if (data.is_open())
     {
+        cout << "test";
         // Read in first row which is column headers
         string firstLine;
         data >> firstLine;
@@ -564,10 +592,11 @@ int main() {
         // Transfer to booleans
         string departDelay, arriveDelay, cancellation;
 
-        int counter = 0;
-
-        //Initialize data structures
+        // INITILIZE DATA STRUCTURES
         vector<Flight> flights;
+		RBTree rbTree;
+
+        int uniqueCounter = 0;
 
         while (!data.eof())
         {
@@ -582,7 +611,9 @@ int main() {
             getline(data, trash1, ',');
             getline(data, cancellation, ',');
             getline(data, trash2);
-            string id = airline + to_string(counter);
+
+            string uniqueID;
+            uniqueID = airline + to_string(uniqueCounter);
 
             // Create flight object based on strings
             // Check if flight is cancelled before adding delays
@@ -591,7 +622,7 @@ int main() {
                 bool delayed, cancelled;
                 cancelled = false;
 
-                if (stoi(departDelay) > 0 && origin == "ORD") 
+                if (stoi(departDelay) > 0 && origin == "ORD")
                     delayed = true;
                 else if (stoi(departDelay) <= 0 && origin == "ORD")
                     delayed = false;
@@ -600,29 +631,25 @@ int main() {
                 else if (stoi(arriveDelay) <= 0 && destination == "ORD")
                     delayed = false;
 
-                Flight currentFlight = Flight(year, month, day, origin, destination, airline, delayed, cancelled, id);
+
+                Flight currentFlight = Flight(year, month, day, origin, destination, airline, delayed, cancelled, uniqueID);
 
                 // INSERT INTO DATA STRUCTURE
                 flights.push_back(currentFlight);
-                currentFlight.printFlight();
+				rbTree.insert(currentFlight);
             }
 
             else
             {
-                Flight currentFlight = Flight(year, month, day, origin, destination, airline, false, true, id);
+                Flight currentFlight = Flight(year, month, day, origin, destination, airline, false, true, uniqueID);
 
                 // INSERT INTO DATA STRUCTURE
                 flights.push_back(currentFlight);
-                currentFlight.printFlight();
             }
+            uniqueCounter++;
         }
-        counter++;
+		//rbTree.inorder();
     }
-
-
-    // Possible data structures:
-    // Red-black tree
-    // 
 
     return 0;
 }
