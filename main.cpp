@@ -19,10 +19,23 @@ private:
 
 public:
     Flight(string _year, string _month, string _day, string _departure, string _arrival, string _airline, bool _delayed, bool _cancelled, string uniqueID);
+	Flight();
 
     void printFlight();
     string GetUniqueID();
 };
+
+Flight::Flight() {
+	year = "null";
+	month = "null";
+	day = "null";
+	departure = "null";
+	arrival = "null";
+	airline = "null";
+	delayed = false;
+	cancelled = false;
+	uniqueID = "null";
+}
 
 //Flight Constructor
 Flight::Flight(string _year, string _month, string _day, string _departure, string _arrival, string _airline, bool _delayed, bool _cancelled, string _uniqueID) {
@@ -85,7 +98,18 @@ struct Node {
 	Node* left; // pointer to left child
 	Node* right; // pointer to right child
 	int color; // 1 -> Red, 0 -> Black
+	
+	Node(Flight _flight, Node* _parent, Node* _left, Node* _right, int _color) :flight(_flight), parent(_parent), left(_left), right(_right), color(_color) {};
+	Node() {
+		flight = Flight();
+		parent = nullptr;
+		left = nullptr;
+		right = nullptr;
+		color = 0;
+	}
 };
+
+
 
 typedef Node* NodePtr;
 
@@ -360,6 +384,7 @@ private:
 
 public:
 	RBTree() {
+		Flight flight();
 		TNULL = new Node;
 		TNULL->color = 0;
 		TNULL->left = nullptr;
@@ -576,7 +601,7 @@ int main() {
     // Loop will create Flight objects to be inserted into Red-Black tree/other container
     ifstream data;
 
-    data.open("Project_3_Dataset_Origin (1).csv");
+    data.open("Project_3_Dataset_Origin.csv");
 
     if (data.is_open())
     {
@@ -648,7 +673,7 @@ int main() {
             }
             uniqueCounter++;
         }
-		//rbTree.inorder();
+		rbTree.inorder();
     }
 
     return 0;
