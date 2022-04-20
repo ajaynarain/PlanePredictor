@@ -6,6 +6,7 @@
 #include <vector>
 #include <math.h>
 #include <unordered_map>
+#include <iomanip>
 
 using namespace std;
 
@@ -23,13 +24,15 @@ class Flight
         Flight(string _year, string _month, string _day, string _departure, string _arrival, string _airline, bool _delayed, bool _cancelled, string _uniqueID);
 
         string GetUniqueID() { return uniqueID; }
+		bool isDelayed() { return delayed; }
+		bool isCancelled() { return cancelled; }
         void printFlight();
 };
 
 // Default constructor
 Flight::Flight()
 {
-    year = month = day = departure = arrival = airline = "NULL";
+    year = month = day = departure = arrival = airline = uniqueID = "NULL";
     delayed = cancelled = false;
 }
 
@@ -49,7 +52,7 @@ Flight::Flight(string _year, string _month, string _day, string _departure, stri
 void Flight::printFlight()
 {
     cout << year << " " << month << " " << day << " " << departure << " " << arrival;
-    cout << " " << airline << " " << delayed << " " << cancelled << endl;
+    cout << " " << airline << " " << delayed << " " << cancelled << " " << uniqueID << endl;
 }
 
 // Object used to hold airline data
@@ -615,6 +618,9 @@ class UnorderedMap
 
         // Print map
         void printMap();
+
+		// Print statistics
+		void printStatistics(string airline);
 };
 
 int UnorderedMap::hash(string str)
@@ -625,16 +631,13 @@ int UnorderedMap::hash(string str)
     Remaining digits: unique ID identifying flights
     EX: AA289 -> the 289th American Airlines flight from data
 
-    - hash() will thus use the powers of 26 method for the first two chars and then add flight number
-    - to prevent all flights from clustering, we multiply the airline code by 10^order of number of flights - 1
+    - hash() will thus use the powers of 26 method for the first two chars and then multiply by the flight number
+    - This results in less clusters of flights together and more room for linear probing if necessary
     */
+	string digits = str.substr(2, str.size() - 2);
+	int temp = str[0] * 26 + str[1];
 
-    int result = 0;
-
-    string digits = str.substr(2, str.size() - 2);
-    int temp = (str[0] * 26 + str[1]) * pow(10, digits.length() - 1);
-
-    return result + stoi(digits);
+	return temp * stoi(digits);
 }
 
 void UnorderedMap::rehash()
@@ -649,9 +652,12 @@ void UnorderedMap::rehash()
     {
         if (map[i] != nullptr)
         {
+			// Node to be inserted
+			HashNode* node = new HashNode(map[i]->key, map[i]->val);
+
             // Find the next open bucket in the new container
             int index = hash(map[i]->key) % numBuckets;
-            while (temp[index] != nullptr)
+            while (temp[index] != nullptr && temp[index]->key != node->key)
             {
                 index++;
 
@@ -661,11 +667,11 @@ void UnorderedMap::rehash()
 
             // Insert
             if (temp[index] == nullptr)
-                temp[index] = map[i];
+                temp[index] = node;
         }
     }
 
-    currentLoad = numEntries / numBuckets;
+    currentLoad = float(numEntries) / float(numBuckets);
 
     // Copy into map variable
     delete[] map;
@@ -691,22 +697,21 @@ void UnorderedMap::insert(string key, Flight val)
 
     // Insert
     if (map[index] == nullptr)
-    {
-        map[index] = node;
         numEntries++;
-    }
+
+	map[index] = node;
 
     // Check if resizing and rehashing needs to occur
-    HashNode** temp;
-    currentLoad = numEntries / numBuckets;
+    currentLoad = float(numEntries) / float(numBuckets);
 
     if (currentLoad >= MAX_LOAD) rehash();
+
 }
 
 Flight UnorderedMap::getFlight(string key)
 {
     // Implemented with linear probing
-    int index = hash(key) % numEntries;
+    int index = hash(key) % numBuckets;
     int finiteCounter = 0;
 
     while (map[index] != nullptr)
@@ -733,8 +738,6 @@ int UnorderedMap::getEntries() { return numEntries; }
 int UnorderedMap::getSize() { return numBuckets; }
 
 void UnorderedMap::printMap()
-
-
 {
     for (int i = 0; i < numBuckets; i++)
     {
@@ -746,15 +749,54 @@ void UnorderedMap::printMap()
     }
 }
 
+void UnorderedMap::printStatistics(string airline)
+{
+	// Search through hashMap to find all flights of the specific airline
+	int numFlights = 0, numDelayed = 0, numCancelled = 0;
+	float pctDelayed = 0.0, pctCancelled = 0.0;
+
+	if (this->getFlight(airline + "0").GetUniqueID() == "NULL")
+		cout << "Airline not found." << endl;
+
+	else
+	{
+		// Loop through all flights in the hash map
+		int i = 0;
+
+		while (this->getFlight(airline + to_string(i)).GetUniqueID() != "NULL")
+		{
+			numFlights++;
+
+			if (this->getFlight(airline + to_string(i)).isDelayed())
+				numDelayed++;
+
+			if (this->getFlight(airline + to_string(i)).isCancelled())
+				numCancelled++;
+
+			i++;
+		}
+
+		pctDelayed = float(numDelayed) / float(numFlights);
+		pctCancelled = float(numCancelled) / float(numFlights);
+
+		// Output
+		cout << "Report for " << airline << ":" << endl;
+		cout << "Percentage of flights delayed:" << endl;
+		cout << fixed << setprecision(2) << pctDelayed * 100 << "%" << endl;
+		cout << "Percentage of flights cancelled:" << endl;
+		cout << fixed << setprecision(2) << pctCancelled * 100 << "%" << endl;
+	}
+}
+
 int main() {
 
     // TO DO:
     /*
-        - create functions to calculate statistics
         - create function for file I/O
         - make sure both files are read in for data
         - have separate functions for using data w/ RB trees and hash tables
         - create UI
+        - use timers to compare insert and calculating statistics
     */
 
     // Read in Excel sheets to gather flight data and place in containers
@@ -824,10 +866,11 @@ int main() {
                     delayed = false;
 
                 Flight currentFlight = Flight(year, month, day, origin, destination, airline, delayed, cancelled, uniqueID);
-                
+
                 // INSERT INTO DATA STRUCTURE
-                // hashMap.insert(uniqueID, currentFlight);
-                tree.insert(currentFlight);
+                hashMap.insert(uniqueID, currentFlight);
+
+                // tree.insert(currentFlight);
             }
 
             else
@@ -835,13 +878,17 @@ int main() {
                 Flight currentFlight = Flight(year, month, day, origin, destination, airline, false, true, uniqueID);
 
                 // INSERT INTO DATA STRUCTURE
-                // hashMap.insert(uniqueID, currentFlight);
-                tree.insert(currentFlight);
+                hashMap.insert(uniqueID, currentFlight);
+                // tree.insert(currentFlight);
             }
         }
         // TESTS
         // hashMap.getFlight("AA1").printFlight();
-        tree.inorder();
+        // tree.inorder();
+
+		hashMap.printStatistics("UA");
+		hashMap.printStatistics("AA");
+		hashMap.printStatistics("US");
     }
 
     return 0;
