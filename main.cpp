@@ -577,8 +577,8 @@ public:
 
 		SearchUserFlightHelper(airline, origin, destination, printing, this->root);
 
-		cout << printing.at(0) << endl;
-		cout << printing.at(1) << endl;
+		cout << "On Time Probability: " << printing.at(0) << endl;
+		cout << "Predicted Status: " << printing.at(1) << endl;
 
 	}
 
@@ -1084,7 +1084,7 @@ void UnorderedMap::SearchUserFlight(string airline, string origin, string destin
 			if (map[i]->val.GetAirline() == airline && map[i]->val.GetOrigin() == origin && map[i]->val.GetDestination() == destination) {
 			
 				cout << "On Time Probability: " << map[i]->val.GetProbDelay() << endl;
-				cout << "Prediction: " << map[i]->val.GetPrediction() << endl;
+				cout << "Prediction Status: " << map[i]->val.GetPrediction() << endl;
 				return;
 			
 			}
@@ -1287,7 +1287,7 @@ int main() {
 					cin >> inputDestination;
 
 					// Search
-					tree.SearchUserFlight(inputAirline, inputOrigin, inputDestination);
+					tree.SearchUserFlight(AirlineLookup(inputAirline), inputOrigin, inputDestination);
 
 					cout << endl;
 
@@ -1371,7 +1371,7 @@ int main() {
 					cin >> inputDestination;
 
 					// Search
-					hashMap.SearchUserFlight(inputAirline, inputOrigin, inputDestination);
+					hashMap.SearchUserFlight(AirlineLookup(inputAirline), inputOrigin, inputDestination);
 
 					cout << endl;
 
