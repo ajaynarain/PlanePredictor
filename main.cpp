@@ -61,7 +61,7 @@ Flight::Flight(string _year, string _month, string _day, string _departure, stri
 
 void Flight::printFlight()
 {
-	// Add output for probDelay and prediction
+
 	cout << year << " " << month << " " << day << " " << departure << " " << arrival;
 	cout << " " << airline << " " << delayed << " " << cancelled << " " << probDelay << " " << prediction << endl;
 
@@ -78,7 +78,6 @@ private:
 public:
 	Airline();
 	Airline(string _name);
-	// REMINDER: only consider positive flight delays
 };
 
 //Airline Constructor
@@ -91,8 +90,6 @@ Airline::Airline(string _name) {
 	pctCancelled = 0.0;
 }
 
-// RED-BLACK TREE
-// DATA STRUCTURES
 // Red Black Tree
 // Data structure that represents a node in the tree
 struct Node {
@@ -169,16 +166,6 @@ private:
 			SearchUserFlightHelper(airline, origin, destination, result, node->right);
 		}
 
-	}
-
-	void PrintFlightsHelper(NodePtr node) {
-	
-		if (node != TNULL) {
-			PrintFlightsHelper(node->left);
-			node->flight.printFlight();
-			PrintFlightsHelper(node->right);
-		}
-	
 	}
 
 
@@ -428,13 +415,6 @@ public:
 		root = TNULL;
 	}
 
-	void PrintFlights() {
-
-		PrintFlightsHelper(this->root);
-
-
-	}
-
 	void CreateTree(ifstream& data, unordered_map<string, int>& flightCounters, RBTree& tree) {
 		if (data.is_open())
 		{
@@ -513,10 +493,8 @@ public:
 
 					Flight currentFlight = Flight(year, month, day, origin, destination, airline, delayed, cancelled, uniqueID, probDelay, prediction);
 
-					//currentFlight.printFlight();
 
 					// INSERT INTO DATA STRUCTURE
-					// hashMap.insert(uniqueID, currentFlight);
 					tree.insert(currentFlight);
 				}
 
@@ -524,7 +502,6 @@ public:
 				{
 					Flight currentFlight = Flight(year, month, day, origin, destination, airline, false, true, uniqueID, probDelay, prediction);
 
-					//currentFlight.printFlight();
 
 					// INSERT INTO DATA STRUCTURE
 					// hashMap.insert(uniqueID, currentFlight);
@@ -546,7 +523,7 @@ public:
 			//If the node with this ID is not found, break out of the while loop.
 			if (currentNode->flight.GetUniqueID() == "NULL") {
 				break;
-				//else, preform the operation
+				//else, perform the operation
 			}
 			else {
 				if (currentNode->flight.GetDelayed() == true) {
@@ -1119,7 +1096,7 @@ void UnorderedMap::SearchUserFlight(string airline, string origin, string destin
 
 }
 
-
+// Returns airline abbreviation.
 string AirlineLookup(string name) {
 
 	if (name == "United") {
@@ -1212,26 +1189,12 @@ string AirlineLookup(string name) {
 
 int main() {
 
-	// TO DO:
-	/*
-		- DONE create functions to calculate statistics
-		- DONE create function for file I/O
-		- DONE make sure 1 combined file is read in for data
-		- DONE have separate functions for using data w/ RB trees and hash tables
-		- create UI
-	*/
-
-	// Read in Excel sheets to gather flight data and place in containers
-	// Loop will create Flight objects to be inserted into Red-Black tree/other container
 	ifstream data;
 	data.open("Project_3_Dataset_All_Flights.csv");
 
-	// Unordered map instantation
 	UnorderedMap hashMap;
 	unordered_map<string, int> flightCounters;
 	RBTree tree;
-
-
 
 	bool validInput = true;
 
@@ -1272,15 +1235,14 @@ int main() {
 				if (inputSearch == 0) {
 
 					// Exit Message
-
-					//tree.PrintFlights();
-
 					cout << "Thank you for using Plane Predictor!" << endl;
 					programActive = false;
 					validInput = false;
 
 				}
 				else if (inputSearch == 1) {
+
+					// Display airline statistics.
 					cout << "Which Airline would you like to search?" << endl;
 					cout << "Enter Airline: ";
 					string inputAirline;
@@ -1307,7 +1269,7 @@ int main() {
 
 				}
 				else if (inputSearch == 2) {
-					//Display the stats.
+					//Display the statistics for a flight.
 
 					cout << "Enter Airline: ";
 
@@ -1368,12 +1330,12 @@ int main() {
 
 				}
 				else if (inputSearch == 1) {
+
+					// Display statistics for an airline.
 					cout << "Which Airline would you like to search?" << endl;
 					cout << "Enter Airline: ";
 					string inputAirline;
 					cin >> inputAirline;
-
-					// Implement timer, output results and performance
 
 						auto start = chrono::high_resolution_clock::now();
 
@@ -1389,7 +1351,9 @@ int main() {
 
 				}
 				else if (inputSearch == 2) {
-					//Display the stats.
+					
+					
+					//Display the statistics for a flight.
 
 					cout << "Enter Airline: ";
 
